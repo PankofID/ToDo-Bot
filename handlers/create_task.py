@@ -8,6 +8,7 @@ from datetime import datetime
 
 from handlers.start import get_main_reply_keyboard
 from database import db_create_task
+from services.notification import create_task_reminder
 
 create_task_router = Router()
 
@@ -263,22 +264,29 @@ async def return_to_main_menu(message: Message, state: FSMContext):
 
 async def finalize_task(message: Message, state: FSMContext, pool):
     data = await state.get_data()
+
     user_id = message.from_user.id
     title = data["title"]
     description = data["description"]
     priority = data["priority"]
-    deadline = datetime.strptime(f'{data["deadline_date"]} {data["deadline_time"]}',"%d-%m-%Y %H:%M")
 
-    await db_create_task(pool, user_id, title, description, priority, deadline)
+    deadline = datetime.strptime(
+        f'{data["deadline_date"]} {data["deadline_time"]}',
+        "%d-%m-%Y %H:%M",
+    )
 
+    task_id = await db_create_task(pool, user_id, title, description, priority, deadline)
+
+    await create_task_reminder(pool=pool,task_id=task_id,deadline=deadline,)
 
     text = (
-        f"✅ Задача создана!\n\n"
+        "✅ Задача создана!\n\n"
         f"📌 Название: {title}\n"
         f"📝 Описание: {description}\n"
         f"⚡ Приоритет: {priority}\n"
-        f"⏰ Дедлайн: {deadline}\n"
+        f"⏰ Deadline: {deadline:%d-%m-%Y %H:%M}"
     )
 
-    await message.answer(text, reply_markup=get_return_main_reply_keyboard())
+    await message.answer(text,reply_markup=get_return_main_reply_keyboard())
+
     await state.clear()

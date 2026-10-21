@@ -133,6 +133,25 @@ async def db_edit_task(pool, task_id: int, user_id: int, field: str, value):
         query = f"UPDATE tasks SET {field} = $1 WHERE id = $2 AND user_id = $3 RETURNING id"
         return await conn.fetchval(query, value, task_id, user_id)
 
+async def get_task_statistics(pool, user_id):
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT
+                COUNT(*) FILTER (WHERE status = 'completed') AS completed_count,
+                COUNT(*) FILTER (WHERE status = 'active') AS active_count,
+                COUNT(*) AS total_count
+            FROM tasks
+            WHERE user_id = $1
+            """,
+            user_id,
+        )
+        return {
+            "completed": row["completed_count"] or 0,
+            "active": row["active_count"] or 0,
+            "total": row["total_count"] or 0,
+        }
+
 # --- Таблица users ---
 async def get_notifications_enabled(pool, user_id: int) -> bool:
     value = await pool.fetchval(

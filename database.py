@@ -39,15 +39,37 @@ async def db_create_task(pool, user_id, title, description, priority, deadline):
     )
 
 async def get_tasks(pool, user_id: int):
+    sort_by = await get_default_sort(pool, user_id) or "created_desc"
+
+    sort_options = {
+        "title": "title ASC",
+        "created_desc": "created_at DESC",
+        "created_asc": "created_at ASC",
+        "deadline": "deadline ASC NULLS LAST",
+        "priority": """
+            CASE priority
+                WHEN 'Высокий' THEN 1
+                WHEN 'Средний' THEN 2
+                WHEN 'Низкий' THEN 3
+                ELSE 4
+            END,
+            created_at DESC
+        """,
+    }
+
+    order_by = sort_options.get(sort_by, sort_options["created_desc"])
+
     tasks = await pool.fetch(
-        """
-        SELECT id, user_id, title, description, priority, status, deadline, created_at, completed_at
+        f"""
+        SELECT id, user_id, title, description, priority, status,
+               deadline, created_at, completed_at
         FROM tasks
         WHERE user_id = $1
-        ORDER BY created_at DESC
+        ORDER BY {order_by}
         """,
-        user_id
+        user_id,
     )
+
     return tasks
 
 async def get_task(pool, task_id: int, user_id: int):
@@ -160,6 +182,13 @@ async def get_notifications_enabled(pool, user_id: int) -> bool:
     )
     return False if value is None else value
 
+async def get_default_sort(pool, user_id: int):
+    value = await pool.fetchval(
+        "SELECT default_sort FROM users WHERE user_id = $1",
+        user_id
+    )
+    return value
+
 async def set_notifications_enabled(pool, user_id: int, enabled: bool):
     await pool.execute(
         """
@@ -169,6 +198,23 @@ async def set_notifications_enabled(pool, user_id: int, enabled: bool):
         SET notifications_enabled = EXCLUDED.notifications_enabled
         """,
         user_id, enabled,
+    )
+
+async def set_default_sort(pool, user_id: int, sort_by: str):
+    allowed_sorts = {"title", "created_desc", "created_asc", "deadline", "priority"}
+
+    if sort_by not in allowed_sorts:
+        raise ValueError(f"Недопустимый способ сортировки: {sort_by}")
+
+    await pool.execute(
+        """
+        INSERT INTO users (user_id, default_sort)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id) DO UPDATE
+        SET default_sort = EXCLUDED.default_sort
+        """,
+        user_id,
+        sort_by,
     )
 
 # --- Таблица task_reminders ---

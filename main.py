@@ -8,6 +8,7 @@ from handlers.create_task import create_task_router
 from handlers.my_tasks import my_tasks_router
 from handlers.notification import notification_router
 from handlers.statistics import statistics_router
+from handlers.settings import settings_router
 from handlers.help import help_router
 
 from database import create_pool
@@ -22,8 +23,9 @@ dp.include_router(start_router)
 dp.include_router(create_task_router)
 dp.include_router(my_tasks_router)
 dp.include_router(notification_router)
-dp.include_router(help_router)
 dp.include_router(statistics_router)
+dp.include_router(settings_router)
+dp.include_router(help_router)
 
 
 async def main():

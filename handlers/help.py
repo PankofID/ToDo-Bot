@@ -10,11 +10,13 @@ help_router = Router()
 @help_router.message(F.text.lower() == "❓ помощь")
 async def help(message: Message):
     await message.answer(
+        "Все команды бота:\n\n"
         "/start - Главное меню\n"
         "/create_task - Создать задачу\n"
         "/my_tasks - Мои задачи\n"
         "/notification - Уведомления\n"
         "/statistics - Статистика\n"
         "/settings - Настройки\n"
-        "/help - Помощь"
-                         )
+        "/help - Помощь\n"
+        "/info - Информация"
+    )

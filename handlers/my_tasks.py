@@ -121,7 +121,7 @@ async def my_tasks(message: Message, pool):
         await message.answer("У вас нет задач")
         return
 
-    await message.answer("Мои задачи", reply_markup=keyboard)
+    await message.answer("Мои задачи:", reply_markup=keyboard)
 
 @my_tasks_router.callback_query(F.data.startswith("task:"))
 async def show_task(callback: CallbackQuery, pool):

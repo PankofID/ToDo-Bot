@@ -23,7 +23,7 @@ async def notification(message: Message, pool):
 
     await message.answer(
         f"Уведомления сейчас {status}.\n"
-        "Если включить — напомним за неделю, за сутки и в момент deadline задачи.",
+        "Если включены — напомним за неделю, за сутки и в момент deadline задачи.",
         reply_markup=get_notification_inline(enabled),
     )
 

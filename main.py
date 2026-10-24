@@ -10,6 +10,7 @@ from handlers.notification import notification_router
 from handlers.statistics import statistics_router
 from handlers.settings import settings_router
 from handlers.help import help_router
+from handlers.information import info_router
 
 from database import create_pool
 from scheduler import scheduler, start_scheduler
@@ -26,6 +27,7 @@ dp.include_router(notification_router)
 dp.include_router(statistics_router)
 dp.include_router(settings_router)
 dp.include_router(help_router)
+dp.include_router(info_router)
 
 
 async def main():

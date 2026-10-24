@@ -21,6 +21,7 @@ async def statistics(message: Message, pool):
     bar = "█" * filled + "░" * (bar_len - filled)
 
     text = (
+        "Твоя статистика:\n"
         f"Всего задач: {total}\n\n"
         f"Активных: {active}\n"
         f"Выполнено: {completed}\n{bar} {completed / total * 100:.0f}%"

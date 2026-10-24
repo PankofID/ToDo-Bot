@@ -56,7 +56,6 @@ pip install -r requirements.txt
 1. Откройте Telegram и найдите **[@BotFather](https://t.me/BotFather)**.
 2. Создайте бота
 3. Получите токен бота
-4. 
 ---
 
 ### Шаг 5. Настройка `.env`
